@@ -15,12 +15,21 @@ function compile() {
   rmSync(out, { recursive: true, force: true })
   mkdirSync(join(out, 'src'), { recursive: true })
   cpSync(new URL('./template', import.meta.url), join(out, 'src'), { recursive: true })
-  cpSync('src/styles.css', join(out, 'src/styles.css'))
+  const stylesheetSource = resolve(cwd, 'src/styles.css')
+  const stylesheetOutput = join(out, 'src/styles.css')
+  cpSync(stylesheetSource, stylesheetOutput)
+  if (!readFileSync(stylesheetSource).equals(readFileSync(stylesheetOutput))) {
+    throw new Error('Built stylesheet differs from src/styles.css')
+  }
   cpSync(new URL('../react', import.meta.url), join(out, 'node_modules/react'), { recursive: true })
   cpSync(new URL('../react-dom', import.meta.url), join(out, 'node_modules/react-dom'), { recursive: true })
   let html = readFileSync('index.html', 'utf8')
-    .replace('  </head>', `    <link rel="stylesheet" href="${base}src/styles.css" />\n  </head>`)
+    .replace('/harlige-benkes/src/styles.css', `${base}src/styles.css`)
     .replace('<script type="module" src="/src/main.jsx"></script>', `<script type="importmap">{"imports":{"react":"${base}node_modules/react/index.js","react/jsx-runtime":"${base}node_modules/react/jsx-runtime.js","react-dom/client":"${base}node_modules/react-dom/client.js"}}</script>\n    <script type="module" src="${base}src/main.js"></script>`)
+  const stylesheetHref = `${base}src/styles.css`
+  if (!html.includes(`<link rel="stylesheet" href="${stylesheetHref}" />`)) {
+    throw new Error(`Missing stylesheet link: ${stylesheetHref}`)
+  }
   writeFileSync(join(out, 'index.html'), html)
 }
 
