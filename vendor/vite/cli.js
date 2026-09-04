@@ -7,15 +7,18 @@ const cwd = process.cwd()
 const build = process.argv[2] === 'build'
 const preview = process.argv[2] === 'preview'
 const out = resolve(cwd, build ? 'dist' : preview ? 'dist' : '.vite-dev')
+const config = (await import(new URL(`file://${resolve(cwd, 'vite.config.js')}`))).default
+const configuredBase = config.base || '/'
+const base = `/${configuredBase.replace(/^\/+|\/+$/g, '')}${configuredBase === '/' ? '' : '/'}`
 
 function compile() {
   rmSync(out, { recursive: true, force: true })
   mkdirSync(join(out, 'src'), { recursive: true })
   cpSync(new URL('./template', import.meta.url), join(out, 'src'), { recursive: true })
   cpSync('src/styles.css', join(out, 'src/styles.css'))
-  cpSync('node_modules/react', join(out, 'node_modules/react'), { recursive: true })
-  cpSync('node_modules/react-dom', join(out, 'node_modules/react-dom'), { recursive: true })
-  let html = readFileSync('index.html', 'utf8').replace('<script type="module" src="/src/main.jsx"></script>', `<script type="importmap">{"imports":{"react":"/node_modules/react/index.js","react/jsx-runtime":"/node_modules/react/jsx-runtime.js","react-dom/client":"/node_modules/react-dom/client.js"}}</script>\n    <script type="module" src="/src/main.js"></script>`)
+  cpSync(new URL('../react', import.meta.url), join(out, 'node_modules/react'), { recursive: true })
+  cpSync(new URL('../react-dom', import.meta.url), join(out, 'node_modules/react-dom'), { recursive: true })
+  let html = readFileSync('index.html', 'utf8').replace('<script type="module" src="/src/main.jsx"></script>', `<script type="importmap">{"imports":{"react":"${base}node_modules/react/index.js","react/jsx-runtime":"${base}node_modules/react/jsx-runtime.js","react-dom/client":"${base}node_modules/react-dom/client.js"}}</script>\n    <script type="module" src="${base}src/main.js"></script>`)
   writeFileSync(join(out, 'index.html'), html)
 }
 
@@ -28,8 +31,10 @@ const portAt = args.indexOf('--port')
 const port = Number(portAt >= 0 ? args[portAt + 1] : 5173)
 const types = { '.html': 'text/html', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json' }
 createServer((request, response) => {
-  const path = normalize(decodeURIComponent(request.url.split('?')[0])).replace(/^(\.\.[/\\])+/, '')
-  let file = join(out, path === '/' ? 'index.html' : path)
+  const urlPath = decodeURIComponent(request.url.split('?')[0])
+  const relativePath = urlPath.startsWith(base) ? urlPath.slice(base.length) : urlPath.replace(/^\/+/, '')
+  const path = normalize(relativePath).replace(/^(\.\.[/\\])+/, '')
+  let file = join(out, path === '.' ? 'index.html' : path)
   if (!file.startsWith(out) || !existsSync(file)) file = join(out, 'index.html')
   response.setHeader('Content-Type', types[extname(file)] || 'application/octet-stream')
   response.end(readFileSync(file))
