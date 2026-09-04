@@ -1,1 +1,1 @@
-{"name":"vite","version":"6.1.0-local","type":"module","bin":{"vite":"cli.js"}}
+{"name":"vite","version":"6.1.0-local","type":"module","exports":"./index.js","bin":{"vite":"cli.js"}}
