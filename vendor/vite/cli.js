@@ -18,7 +18,9 @@ function compile() {
   cpSync('src/styles.css', join(out, 'src/styles.css'))
   cpSync(new URL('../react', import.meta.url), join(out, 'node_modules/react'), { recursive: true })
   cpSync(new URL('../react-dom', import.meta.url), join(out, 'node_modules/react-dom'), { recursive: true })
-  let html = readFileSync('index.html', 'utf8').replace('<script type="module" src="/src/main.jsx"></script>', `<script type="importmap">{"imports":{"react":"${base}node_modules/react/index.js","react/jsx-runtime":"${base}node_modules/react/jsx-runtime.js","react-dom/client":"${base}node_modules/react-dom/client.js"}}</script>\n    <script type="module" src="${base}src/main.js"></script>`)
+  let html = readFileSync('index.html', 'utf8')
+    .replace('  </head>', `    <link rel="stylesheet" href="${base}src/styles.css" />\n  </head>`)
+    .replace('<script type="module" src="/src/main.jsx"></script>', `<script type="importmap">{"imports":{"react":"${base}node_modules/react/index.js","react/jsx-runtime":"${base}node_modules/react/jsx-runtime.js","react-dom/client":"${base}node_modules/react-dom/client.js"}}</script>\n    <script type="module" src="${base}src/main.js"></script>`)
   writeFileSync(join(out, 'index.html'), html)
 }
 
