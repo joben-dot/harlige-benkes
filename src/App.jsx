@@ -1,6 +1,5 @@
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 import { useState } from 'react';
-import Backoffice from './Backoffice.jsx';
 export const pizzas = [
     { id: 'ossj', name: 'OSSJ DEVON', price: 169, icon: '✿', image: 'pizza-1', archived: false, description: 'Klassikern som svänger hela vägen hem.', toppings: 'Tomat, fior di latte, pepperoni, picklad chili & honung' },
     { id: 'gogg', name: 'EXPRÄ GOGGONZÅLA', price: 179, icon: '☮', image: 'pizza-2', archived: false, description: 'Krämig, kaxig och fullständigt övestyv.', toppings: 'Gorgonzola, päron, valnöt, mozzarella & ruccola' },
@@ -45,6 +44,5 @@ function Contact() {
     return _jsxs("section", { className: "section contact", id: "kontakt", children: [_jsxs("div", { children: [_jsx("p", { children: "SKRIK INTE \u2014 SKRIV" }), _jsx("h2", { children: "K\u00C5NTAKT" }), _jsx("p", { children: "Boka trucken, fr\u00E5ga om t\u00E5ppings eller f\u00F6resl\u00E5 ett samarbete." })] }), _jsx("a", { className: "button pink", href: "mailto:hej@harligebenkes.se", children: "HEJ@HARLIGEBENKES.SE" })] });
 }
 export default function App() {
-    if (new URLSearchParams(window.location.search).get('h') === 'backoffice') return _jsx(Backoffice, { initialPizzas: pizzas });
     return _jsxs(_Fragment, { children: [_jsx("a", { className: "skip-link", href: "#main", children: "Hoppa till inneh\u00E5llet" }), _jsx(Header, {}), _jsxs("main", { id: "main", children: [_jsx(Hero, {}), _jsx(PizzaMenu, {}), _jsx(Events, {}), _jsx(Social, {}), _jsx(Payment, {}), _jsx(About, {}), _jsx(Contact, {})] }), _jsxs("footer", { children: [_jsxs("div", { className: "footer-logo", children: ["H\u00C4RLIGE BENKES ", _jsx("span", { children: "PIZZA" })] }), _jsx("p", { children: "PEACE \u00B7 PIZZA \u00B7 LOVER" }), _jsx("p", { children: "\u00A9 2026 \u00B7 GJORT MED \u2665 I HUSKVANA" })] })] });
 }

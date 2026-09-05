@@ -9,16 +9,16 @@ const assert = (condition, message) => {
 
 assert(!existsSync(resolve(root, 'vendor/vite/template/App.js')), 'vendor/vite/template/App.js must not exist')
 assert(
-  read('dist/src/App.js') === read('src/App.jsx').replace("'./Backoffice.jsx'", "'./Backoffice.js'"),
-  'dist/src/App.js is not built directly from src/App.jsx with its browser module extension rewritten',
+  read('dist/src/App.js') === read('src/App.jsx'),
+  'dist/src/App.js is not copied directly from src/App.jsx',
 )
 assert(read('dist/src/Backoffice.js') === read('src/Backoffice.jsx'), 'dist/src/Backoffice.js is not copied directly from src/Backoffice.jsx')
 assert(read('dist/src/styles.css') === read('src/styles.css'), 'dist/src/styles.css is not copied directly from src/styles.css')
 assert(read('dist/index.html').includes('/harlige-benkes/src/main.js'), 'GitHub Pages subpath is missing from the entry script')
 assert(read('dist/index.html').includes('/harlige-benkes/src/styles.css'), 'GitHub Pages subpath is missing from the stylesheet')
 
-// Follow local static imports from the published entry module. Every referenced
-// module must exist under dist, just as it must when GitHub Pages serves it.
+// Follow local static and dynamic imports from the published entry module. Every
+// referenced module must exist under dist, just as it must when Pages serves it.
 const checkedModules = new Set()
 function verifyLocalImports(modulePath) {
   const absoluteModule = resolve(root, modulePath)
@@ -27,7 +27,10 @@ function verifyLocalImports(modulePath) {
   checkedModules.add(absoluteModule)
 
   const source = readFileSync(absoluteModule, 'utf8')
-  const imports = source.matchAll(/(?:import|export)\s+(?:[^'";]*?\s+from\s+)?['"](\.[^'"]+)['"]/g)
+  const imports = [
+    ...source.matchAll(/(?:import|export)\s+(?:[^'";]*?\s+from\s+)?['"](\.[^'"]+)['"]/g),
+    ...source.matchAll(/import\(\s*['"](\.[^'"]+)['"]\s*\)/g),
+  ]
   for (const [, specifier] of imports) {
     const importedModule = resolve(dirname(absoluteModule), specifier)
     const importedPath = relative(root, importedModule)
@@ -37,6 +40,38 @@ function verifyLocalImports(modulePath) {
   }
 }
 verifyLocalImports('dist/src/main.js')
+
+// An import map only resolves a module URL; it cannot synthesize missing ESM
+// exports. Validate named imports against the exact runtime published in dist.
+const vendoredModules = new Map([
+  ['react', 'dist/node_modules/react/index.js'],
+  ['react/jsx-runtime', 'dist/node_modules/react/jsx-runtime.js'],
+  ['react-dom/client', 'dist/node_modules/react-dom/client.js'],
+])
+for (const modulePath of checkedModules) {
+  const source = readFileSync(modulePath, 'utf8')
+  for (const match of source.matchAll(/import\s+([^;]+?)\s+from\s+['"]([^'"]+)['"]/g)) {
+    const [, clause, specifier] = match
+    const vendorPath = vendoredModules.get(specifier)
+    if (!vendorPath) continue
+    const vendorSource = read(vendorPath)
+    const named = clause.match(/\{([^}]+)\}/)?.[1] ?? ''
+    for (const item of named.split(',').map(value => value.trim()).filter(Boolean)) {
+      const importedName = item.split(/\s+as\s+/)[0].trim()
+      assert(
+        new RegExp(`export\\s+(?:const|let|var|function|class)\\s+${importedName}\\b`).test(vendorSource),
+        `${relative(root, modulePath)} imports ${importedName} from ${specifier}, but ${vendorPath} does not export it`,
+      )
+    }
+  }
+}
+
+const main = read('dist/src/main.js')
+assert(
+  main.includes("backoffice\n  ? await Promise.all([import('./Backoffice.js'), import('./App.js')])"),
+  'Backoffice is not conditionally loaded',
+)
+assert(!read('dist/src/App.js').includes('Backoffice'), 'public App.js must not load Backoffice')
 
 const app = read('dist/src/App.js')
 for (const expected of ['GOJIG JORDPÄRA', 'Fäjsbook', 'LOVER', 'VECKANS']) {
