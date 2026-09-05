@@ -20,12 +20,14 @@ npm run build
 npm run preview
 ```
 
-Produktionsbygget hamnar i `dist/`. Projektet är redo att kopplas till exempelvis Netlify senare, men innehåller ingen deployment-konfiguration eller backend i v0.1.
+Produktionsbygget hamnar i `dist/` och använder bas-sökvägen `/harlige-benkes/` för GitHub Pages. `npm run build` verifierar också att JavaScript och CSS i `dist/` kommer direkt från `src/` och att ingen separat vendored App-mall finns.
 
 ## Projektstruktur
 
 - `src/App.jsx` – sidans sektioner, komponenter och redigerbar dummydata.
 - `src/styles.css` – all responsiv styling och illustrationer.
 - `src/main.jsx` – React-startpunkt.
+
+`src/App.jsx` och `src/styles.css` är de enda innehålls- respektive stilkällorna. Den lokala, offline-anpassade Vite-builden kopierar dem byte för byte till körbara `.js`/`.css`-filer i `dist/`; lägg därför inte applikationskod under `vendor/`. Källfilerna innehåller runtime-redo JavaScript med Reacts JSX-runtime så att bygget inte behöver en andra, förkompilerad App-kopia.
 
 Betalningar, formulär, lajvstatus och länkar till sociala medier är tydligt märkta prototyper och kopplas till riktiga tjänster i en senare version.

@@ -11,19 +11,28 @@ const config = (await import(new URL(`file://${resolve(cwd, 'vite.config.js')}`)
 const configuredBase = config.base || '/'
 const base = `/${configuredBase.replace(/^\/+|\/+$/g, '')}${configuredBase === '/' ? '' : '/'}`
 
+function copySource(sourceName, outputName) {
+  const source = resolve(cwd, 'src', sourceName)
+  const output = join(out, 'src', outputName)
+  cpSync(source, output)
+  if (!readFileSync(source).equals(readFileSync(output))) {
+    throw new Error(`Built ${outputName} differs from src/${sourceName}`)
+  }
+}
+
 function compile() {
   rmSync(out, { recursive: true, force: true })
   mkdirSync(join(out, 'src'), { recursive: true })
-  cpSync(new URL('./template', import.meta.url), join(out, 'src'), { recursive: true })
-  const stylesheetSource = resolve(cwd, 'src/styles.css')
-  const stylesheetOutput = join(out, 'src/styles.css')
-  cpSync(stylesheetSource, stylesheetOutput)
-  if (!readFileSync(stylesheetSource).equals(readFileSync(stylesheetOutput))) {
-    throw new Error('Built stylesheet differs from src/styles.css')
-  }
+
+  // Application code and styles always come from src/. There is deliberately no
+  // vendored application template: these byte-for-byte checks enforce that rule.
+  copySource('main.jsx', 'main.js')
+  copySource('App.jsx', 'App.js')
+  copySource('styles.css', 'styles.css')
+
   cpSync(new URL('../react', import.meta.url), join(out, 'node_modules/react'), { recursive: true })
   cpSync(new URL('../react-dom', import.meta.url), join(out, 'node_modules/react-dom'), { recursive: true })
-  let html = readFileSync('index.html', 'utf8')
+  let html = readFileSync(resolve(cwd, 'index.html'), 'utf8')
     .replace('/harlige-benkes/src/styles.css', `${base}src/styles.css`)
     .replace('<script type="module" src="/src/main.jsx"></script>', `<script type="importmap">{"imports":{"react":"${base}node_modules/react/index.js","react/jsx-runtime":"${base}node_modules/react/jsx-runtime.js","react-dom/client":"${base}node_modules/react-dom/client.js"}}</script>\n    <script type="module" src="${base}src/main.js"></script>`)
   const stylesheetHref = `${base}src/styles.css`
@@ -34,7 +43,7 @@ function compile() {
 }
 
 if (!preview) compile()
-if (build) { console.log('✓ built in local offline mode → dist/'); process.exit(0) }
+if (build) { console.log('✓ built from src/ in local offline mode → dist/'); process.exit(0) }
 if (!existsSync(join(out, 'index.html'))) { console.error('Run npm run build first.'); process.exit(1) }
 
 const args = process.argv.slice(2)
