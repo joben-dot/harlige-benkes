@@ -1,14 +1,27 @@
 const Fragment = Symbol.for('react.fragment')
 const StrictMode = Symbol.for('react.strict_mode')
 let activeRoot
+let activeHooks
 let hookIndex = 0
 
-function append(parent, value) {
+function append(parent, value, path = '0') {
   if (value == null || value === false || value === true) return
-  if (Array.isArray(value)) return value.forEach(child => append(parent, child))
+  if (Array.isArray(value)) return value.forEach((child, index) => append(parent, child, `${path}.${index}`))
   if (typeof value === 'string' || typeof value === 'number') return parent.append(document.createTextNode(String(value)))
-  if (value.type === Fragment || value.type === StrictMode) return append(parent, value.props.children)
-  if (typeof value.type === 'function') return append(parent, value.type(value.props))
+  if (value.type === Fragment || value.type === StrictMode) return append(parent, value.props.children, path)
+  if (typeof value.type === 'function') {
+    const instance = activeRoot.components.get(path)
+    const hooks = instance?.type === value.type ? instance.hooks : []
+    activeRoot.components.set(path, { type: value.type, hooks })
+    const parentHooks = activeHooks
+    const parentHookIndex = hookIndex
+    activeHooks = hooks
+    hookIndex = 0
+    const rendered = value.type(value.props)
+    activeHooks = parentHooks
+    hookIndex = parentHookIndex
+    return append(parent, rendered, `${path}.0`)
+  }
 
   const element = document.createElement(value.type)
   for (const [name, prop] of Object.entries(value.props)) {
@@ -19,7 +32,7 @@ function append(parent, value) {
     else if (prop === true) element.setAttribute(name, '')
     else element.setAttribute(name, String(prop))
   }
-  append(element, value.props.children)
+  append(element, value.props.children, `${path}.0`)
   parent.append(element)
 }
 
@@ -27,9 +40,10 @@ globalThis.__HBP_REACT__ = {
   useState(initial) {
     const root = activeRoot
     const index = hookIndex++
-    if (!(index in root.hooks)) root.hooks[index] = typeof initial === 'function' ? initial() : initial
-    return [root.hooks[index], value => {
-      root.hooks[index] = typeof value === 'function' ? value(root.hooks[index]) : value
+    const hooks = activeHooks
+    if (!(index in hooks)) hooks[index] = typeof initial === 'function' ? initial() : initial
+    return [hooks[index], value => {
+      hooks[index] = typeof value === 'function' ? value(hooks[index]) : value
       root.paint()
     }]
   },
@@ -37,10 +51,11 @@ globalThis.__HBP_REACT__ = {
 
 export function createRoot(container) {
   const root = {
-    hooks: [],
+    components: new Map(),
     tree: null,
     paint() {
       activeRoot = root
+      activeHooks = null
       hookIndex = 0
       container.replaceChildren()
       append(container, root.tree)

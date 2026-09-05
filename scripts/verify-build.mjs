@@ -13,6 +13,10 @@ assert(
   'dist/src/App.js is not copied directly from src/App.jsx',
 )
 assert(read('dist/src/Backoffice.js') === read('src/Backoffice.jsx'), 'dist/src/Backoffice.js is not copied directly from src/Backoffice.jsx')
+const backoffice = read('src/Backoffice.jsx')
+assert(backoffice.includes('const chatMessages = Array.isArray(chat) ? chat : []'), 'Backoffice chat rendering must normalize non-array values')
+assert(backoffice.includes('setChat(previous => [...(Array.isArray(previous) ? previous : [])'), 'Backoffice chat updates must preserve the array state type')
+assert(backoffice.includes('const pizzaSeed = Array.isArray(initialPizzas) ? initialPizzas : []'), 'Backoffice pizza and menu state must start from an array')
 assert(read('dist/src/styles.css') === read('src/styles.css'), 'dist/src/styles.css is not copied directly from src/styles.css')
 assert(read('dist/index.html').includes('/harlige-benkes/src/main.js'), 'GitHub Pages subpath is missing from the entry script')
 assert(read('dist/index.html').includes('/harlige-benkes/src/styles.css'), 'GitHub Pages subpath is missing from the stylesheet')
