@@ -115,3 +115,29 @@ test('Backoffice survives repeated stateful view switching without collection co
   fire(button(container, 'DAGENS MENY'), 'click')
   assert.ok(container.textContent.includes('Ingen pizza vald'))
 })
+
+test('VEGAN? surprise opens, avoids repeats, and closes again', async () => {
+  const { createRoot } = await import('../vendor/react-dom/client.js')
+  const { jsx } = await import('../vendor/react/jsx-runtime.js')
+  const { default: App, selectVeganResult, veganResults } = await import('../dist/src/App.js')
+  const container = new TestNode('root')
+
+  createRoot(container).render(jsx(App, {}))
+  const trigger = button(container, 'VEGAN?')
+  assert.ok(trigger, 'the standalone VEGAN? button is rendered')
+  assert.equal(trigger.attributes['aria-label'], 'Testa Benkes veganska slumpgenerator')
+
+  fire(trigger, 'click')
+  assert.ok(container.textContent.includes('KOLLAR I UGNEN…'), 'the spinner opens immediately')
+  await new Promise(resolve => setTimeout(resolve, 1250))
+  assert.ok(veganResults.some(result => container.textContent.includes(result.text)), 'a random result replaces the spinner')
+
+  fire(button(container, '×'), 'click')
+  assert.ok(!veganResults.some(result => container.textContent.includes(result.text)), 'the result can be closed without a reload')
+
+  for (let previous = 0; previous < veganResults.length; previous += 1) {
+    for (const random of [0, 0.25, 0.5, 0.999999]) {
+      assert.notEqual(selectVeganResult(previous, () => random), previous, 'the immediately previous result is excluded')
+    }
+  }
+})
