@@ -1,10 +1,11 @@
 import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
 import { useState } from 'react';
-const pizzas = [
-    { name: 'OSSJ DEVON', price: 169, icon: '✿', description: 'Klassikern som svänger hela vägen hem.', toppings: 'Tomat, fior di latte, pepperoni, picklad chili & honung' },
-    { name: 'EXPRÄ GOGGONZÅLA', price: 179, icon: '☮', description: 'Krämig, kaxig och fullständigt övestyv.', toppings: 'Gorgonzola, päron, valnöt, mozzarella & ruccola' },
-    { name: 'GOJIG JORDPÄRA', price: 175, icon: '♥', description: 'Potatis på pizza? Självklart.', toppings: 'Jordpära, rosmarin, västerbottensost & joning-sås' },
-    { name: 'PILO SPÄZZIJAL', price: 189, icon: '★', description: 'Benkes mest psykedeliska skapelse.', toppings: 'Nduja, svamp, karamelliserad lök, parmesan & grönt goj' },
+import Backoffice from './Backoffice.jsx';
+export const pizzas = [
+    { id: 'ossj', name: 'OSSJ DEVON', price: 169, icon: '✿', image: 'pizza-1', archived: false, description: 'Klassikern som svänger hela vägen hem.', toppings: 'Tomat, fior di latte, pepperoni, picklad chili & honung' },
+    { id: 'gogg', name: 'EXPRÄ GOGGONZÅLA', price: 179, icon: '☮', image: 'pizza-2', archived: false, description: 'Krämig, kaxig och fullständigt övestyv.', toppings: 'Gorgonzola, päron, valnöt, mozzarella & ruccola' },
+    { id: 'jord', name: 'GOJIG JORDPÄRA', price: 175, icon: '♥', image: 'pizza-3', archived: false, description: 'Potatis på pizza? Självklart.', toppings: 'Jordpära, rosmarin, västerbottensost & joning-sås' },
+    { id: 'pilo', name: 'PILO SPÄZZIJAL', price: 189, icon: '★', image: 'pizza-4', archived: false, description: 'Benkes mest psykedeliska skapelse.', toppings: 'Nduja, svamp, karamelliserad lök, parmesan & grönt goj' },
 ];
 const events = [
     { day: '12', month: 'SEP', place: 'Huskvana', venue: 'Folkets park', time: '17:00–22:00' },
@@ -44,5 +45,6 @@ function Contact() {
     return _jsxs("section", { className: "section contact", id: "kontakt", children: [_jsxs("div", { children: [_jsx("p", { children: "SKRIK INTE \u2014 SKRIV" }), _jsx("h2", { children: "K\u00C5NTAKT" }), _jsx("p", { children: "Boka trucken, fr\u00E5ga om t\u00E5ppings eller f\u00F6resl\u00E5 ett samarbete." })] }), _jsx("a", { className: "button pink", href: "mailto:hej@harligebenkes.se", children: "HEJ@HARLIGEBENKES.SE" })] });
 }
 export default function App() {
+    if (new URLSearchParams(window.location.search).get('h') === 'backoffice') return _jsx(Backoffice, { initialPizzas: pizzas });
     return _jsxs(_Fragment, { children: [_jsx("a", { className: "skip-link", href: "#main", children: "Hoppa till inneh\u00E5llet" }), _jsx(Header, {}), _jsxs("main", { id: "main", children: [_jsx(Hero, {}), _jsx(PizzaMenu, {}), _jsx(Events, {}), _jsx(Social, {}), _jsx(Payment, {}), _jsx(About, {}), _jsx(Contact, {})] }), _jsxs("footer", { children: [_jsxs("div", { className: "footer-logo", children: ["H\u00C4RLIGE BENKES ", _jsx("span", { children: "PIZZA" })] }), _jsx("p", { children: "PEACE \u00B7 PIZZA \u00B7 LOVER" }), _jsx("p", { children: "\u00A9 2026 \u00B7 GJORT MED \u2665 I HUSKVANA" })] })] });
 }

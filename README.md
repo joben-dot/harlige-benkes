@@ -13,6 +13,19 @@ npm run dev
 
 Öppna adressen som Vite visar, normalt [http://localhost:5173](http://localhost:5173).
 
+## Backoffice-prototyp
+
+Det mobilanpassade, operativa backoffice-läget öppnas med query-parametern
+`?h=backoffice`, exempelvis:
+
+- lokalt: `http://localhost:5173/?h=backoffice`
+- GitHub Pages: `https://joben-dot.github.io/harlige-benkes/?h=backoffice`
+
+Backoffice använder gemensamma pizzaobjekt för bibliotek, dagens meny, QR-kundvy
+och köksvy. Alla ändringar är avsiktligt tillfälliga och finns bara i sidans
+React-state tills en riktig leverantör för databas, autentisering, betalning,
+positionering, media och streaming kopplas in.
+
 ## Bygg och förhandsgranska
 
 ```bash
