@@ -26,6 +26,27 @@ const fire = (node, name, target = node) => {
   node.listeners[name]({ preventDefault() {}, target, currentTarget: node })
 }
 
+test('the lighthearted standard profile is active and can be extended', async () => {
+  const { createRoot } = await import('../vendor/react-dom/client.js')
+  const { jsx } = await import('../vendor/react/jsx-runtime.js')
+  const { default: App, activeLanguageProfile, getLanguageProfile, languageProfiles } = await import('../dist/src/App.js')
+  const container = new TestNode('root')
+
+  createRoot(container).render(jsx(App, {}))
+  assert.equal(activeLanguageProfile, 'standard')
+  assert.equal(getLanguageProfile('standard'), languageProfiles.standard)
+  languageProfiles.future = { ...languageProfiles.standard, contact: 'Hallå!' }
+  assert.equal(getLanguageProfile('future').contact, 'Hallå!')
+
+  const removedTerms = ['Huskvana', 'Jönnet', 'i Jönkan', 'Evänts', 'Kaländarium', 'Kåntakt', 'Tåppings', 'Se mänyn', 'Fäjjsbook', 'Kåntanter', 'betala mä kott', 'Lajv', 'Lover', 'muchar', 'goj', 'gojjor', 'gojjer', 'övestyv', 'joning-sås', 'SÅSSIALA KANALER']
+  for (const term of removedTerms) {
+    assert.ok(!container.textContent.toLocaleLowerCase('sv-SE').includes(term.toLocaleLowerCase('sv-SE')), `${term} must not be visible`)
+  }
+  for (const brandPhrase of ['PIZZA AROUND THE CLOCK', 'GET PIZZA!', 'FIND THE TRUCK', 'PEACE · PIZZA · LOVE']) {
+    assert.ok(container.textContent.includes(brandPhrase), `${brandPhrase} must remain unchanged`)
+  }
+})
+
 test('component state is scoped by parent instance, type, and key', async () => {
   const { createRoot } = await import('../vendor/react-dom/client.js')
   const { jsx } = await import('../vendor/react/jsx-runtime.js')
@@ -59,7 +80,7 @@ test('Backoffice survives repeated stateful view switching without collection co
   const { pizzas } = await import('../dist/src/App.js')
   const container = new TestNode('root')
   createRoot(container).render(jsx(Backoffice, { initialPizzas: pizzas }))
-  const views = ['DAGENS MENY', 'FRÅN LUCKAN', 'BESTÄLLNINGAR', 'SÄNDER LAJV', 'TRUCKSTATUS', 'PIZZABIBLIOTEK']
+  const views = ['DAGENS MENY', 'FRÅN LUCKAN', 'BESTÄLLNINGAR', 'SÄNDER LIVE', 'TRUCKSTATUS', 'PIZZABIBLIOTEK']
 
   for (let round = 0; round < 3; round += 1) {
     for (const view of views) {
@@ -77,7 +98,7 @@ test('Backoffice survives repeated stateful view switching without collection co
         fire(button(container, 'ÖPPNA QR-KUNDVY'), 'click')
         fire(button(container, '+'), 'click')
         assert.ok(!container.textContent.includes('TOTALT 0 KR'), 'cart remains an object and computes a total')
-      } else if (view === 'SÄNDER LAJV') {
+      } else if (view === 'SÄNDER LIVE') {
         const input = all(container, node => node.type === 'input')[1]
         fire(input, 'change', { value: `chat-${round}` })
         fire(all(container, node => node.type === 'form')[0], 'submit')
