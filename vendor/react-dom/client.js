@@ -4,23 +4,36 @@ let activeRoot
 let activeHooks
 let hookIndex = 0
 
-function append(parent, value, path = '0') {
+const componentSlot = (value, path) => value.key == null ? path : `${path}:key:${String(value.key)}`
+
+function append(parent, value, owner, path = '0') {
   if (value == null || value === false || value === true) return
-  if (Array.isArray(value)) return value.forEach((child, index) => append(parent, child, `${path}.${index}`))
+  if (Array.isArray(value)) return value.forEach((child, index) => append(parent, child, owner, `${path}.${index}`))
   if (typeof value === 'string' || typeof value === 'number') return parent.append(document.createTextNode(String(value)))
-  if (value.type === Fragment || value.type === StrictMode) return append(parent, value.props.children, path)
+  if (value.type === Fragment || value.type === StrictMode) return append(parent, value.props.children, owner, path)
   if (typeof value.type === 'function') {
-    const instance = activeRoot.components.get(path)
-    const hooks = instance?.type === value.type ? instance.hooks : []
-    activeRoot.components.set(path, { type: value.type, hooks })
+    const slot = componentSlot(value, path)
+    const previous = owner.children.get(slot)
+    const instance = previous?.type === value.type && previous.key === value.key
+      ? previous
+      : { type: value.type, key: value.key, hooks: [], children: new Map() }
+    owner.nextChildren.set(slot, instance)
     const parentHooks = activeHooks
     const parentHookIndex = hookIndex
-    activeHooks = hooks
+    activeHooks = instance.hooks
     hookIndex = 0
-    const rendered = value.type(value.props)
-    activeHooks = parentHooks
-    hookIndex = parentHookIndex
-    return append(parent, rendered, `${path}.0`)
+    let rendered
+    try {
+      rendered = value.type(value.props)
+    } finally {
+      activeHooks = parentHooks
+      hookIndex = parentHookIndex
+    }
+    instance.nextChildren = new Map()
+    append(parent, rendered, instance)
+    instance.children = instance.nextChildren
+    delete instance.nextChildren
+    return
   }
 
   const element = document.createElement(value.type)
@@ -32,7 +45,7 @@ function append(parent, value, path = '0') {
     else if (prop === true) element.setAttribute(name, '')
     else element.setAttribute(name, String(prop))
   }
-  append(element, value.props.children, `${path}.0`)
+  append(element, value.props.children, owner, `${path}.0`)
   parent.append(element)
 }
 
@@ -51,14 +64,17 @@ globalThis.__HBP_REACT__ = {
 
 export function createRoot(container) {
   const root = {
-    components: new Map(),
+    children: new Map(),
     tree: null,
     paint() {
       activeRoot = root
       activeHooks = null
       hookIndex = 0
       container.replaceChildren()
-      append(container, root.tree)
+      root.nextChildren = new Map()
+      append(container, root.tree, root)
+      root.children = root.nextChildren
+      delete root.nextChildren
     },
     render(tree) { root.tree = tree; root.paint() },
   }
