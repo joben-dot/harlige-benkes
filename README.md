@@ -43,4 +43,4 @@ Produktionsbygget hamnar i `dist/` och använder bas-sökvägen `/harlige-benkes
 
 `src/App.jsx` och `src/styles.css` är de enda innehålls- respektive stilkällorna. Den lokala, offline-anpassade Vite-builden kopierar dem byte för byte till körbara `.js`/`.css`-filer i `dist/`; lägg därför inte applikationskod under `vendor/`. Källfilerna innehåller runtime-redo JavaScript med Reacts JSX-runtime så att bygget inte behöver en andra, förkompilerad App-kopia.
 
-Betalningar, formulär, lajvstatus och länkar till sociala medier är tydligt märkta prototyper och kopplas till riktiga tjänster i en senare version.
+Betalningar, formulär, livestatus och länkar till sociala medier är tydligt märkta prototyper och kopplas till riktiga tjänster i en senare version.

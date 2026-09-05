@@ -26,6 +26,25 @@ const fire = (node, name, target = node) => {
   node.listeners[name]({ preventDefault() {}, target, currentTarget: node })
 }
 
+test('standard language is active while the Benke vocabulary remains available', async () => {
+  const { createRoot } = await import('../vendor/react-dom/client.js')
+  const { jsx } = await import('../vendor/react/jsx-runtime.js')
+  const { default: App, activeLanguageProfile, languageProfiles } = await import('../dist/src/App.js')
+  const container = new TestNode('root')
+
+  createRoot(container).render(jsx(App, {}))
+  assert.equal(activeLanguageProfile, 'standard')
+  assert.equal(languageProfiles.benke.pizzaNames.ossj, 'OSSJ DEVON')
+  assert.equal(languageProfiles.benke.payByCard, 'betala mä kott')
+
+  const inactiveTerms = Object.values(languageProfiles.benke).flatMap(value =>
+    typeof value === 'object' ? Object.values(value) : value,
+  )
+  for (const term of inactiveTerms) {
+    assert.ok(!container.textContent.toLocaleLowerCase('sv-SE').includes(term.toLocaleLowerCase('sv-SE')), `${term} must not be visible`)
+  }
+})
+
 test('component state is scoped by parent instance, type, and key', async () => {
   const { createRoot } = await import('../vendor/react-dom/client.js')
   const { jsx } = await import('../vendor/react/jsx-runtime.js')
@@ -59,7 +78,7 @@ test('Backoffice survives repeated stateful view switching without collection co
   const { pizzas } = await import('../dist/src/App.js')
   const container = new TestNode('root')
   createRoot(container).render(jsx(Backoffice, { initialPizzas: pizzas }))
-  const views = ['DAGENS MENY', 'FRÅN LUCKAN', 'BESTÄLLNINGAR', 'SÄNDER LAJV', 'TRUCKSTATUS', 'PIZZABIBLIOTEK']
+  const views = ['DAGENS MENY', 'FRÅN LUCKAN', 'BESTÄLLNINGAR', 'SÄNDER LIVE', 'TRUCKSTATUS', 'PIZZABIBLIOTEK']
 
   for (let round = 0; round < 3; round += 1) {
     for (const view of views) {
@@ -77,7 +96,7 @@ test('Backoffice survives repeated stateful view switching without collection co
         fire(button(container, 'ÖPPNA QR-KUNDVY'), 'click')
         fire(button(container, '+'), 'click')
         assert.ok(!container.textContent.includes('TOTALT 0 KR'), 'cart remains an object and computes a total')
-      } else if (view === 'SÄNDER LAJV') {
+      } else if (view === 'SÄNDER LIVE') {
         const input = all(container, node => node.type === 'input')[1]
         fire(input, 'change', { value: `chat-${round}` })
         fire(all(container, node => node.type === 'form')[0], 'submit')

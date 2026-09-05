@@ -78,11 +78,26 @@ assert(
 assert(!read('dist/src/App.js').includes('Backoffice'), 'public App.js must not load Backoffice')
 
 const app = read('dist/src/App.js')
-for (const expected of ['GOJIG JORDPÄRA', 'Fäjsbook', 'LOVER', 'VECKANS']) {
+const languageProfile = app
+assert(
+  languageProfile.includes("export const activeLanguageProfile = 'standard'"),
+  'standard Swedish must be the active language profile',
+)
+for (const expected of ['PEPPERONI, CHILI & HONUNG', 'Facebook', 'Ingredienser', 'Huskvarna']) {
+  assert(languageProfile.includes(expected), `standard profile does not contain ${JSON.stringify(expected)}`)
+}
+for (const expected of [
+  'OSSJ DEVON', 'EXPRÄ GOGGONZÅLA', 'FJOCKLA JORDPÄRA', 'PILO SPÄZZIJAL',
+  'Huskvana', 'Jönnet', 'Evänts', 'Kaländarium', 'Kåntakt', 'Tåppings',
+  'Se mänyn', 'Fäjjsbook', 'Kåntanter', 'betala mä kott',
+]) {
+  assert(languageProfile.includes(expected), `benke profile does not preserve ${JSON.stringify(expected)}`)
+}
+for (const expected of ['VECKANS', 'language.ingredients.toUpperCase()', 'language.seeMenu.toUpperCase()']) {
   assert(app.includes(expected), `dist/src/App.js does not contain ${JSON.stringify(expected)}`)
 }
-for (const removed of ['FJOCKLA', 'TYEN', 'FÄJJSBOOK', 'LOVVER']) {
-  assert(!app.includes(removed), `dist/src/App.js still contains ${JSON.stringify(removed)}`)
+for (const inactive of ['OSSJ DEVON', 'Huskvana', 'Evänts', 'Kaländarium', 'Kåntakt', 'Tåppings', 'Se mänyn', 'Fäjjsbook', 'Kåntanter', 'betala mä kott', 'Lajv']) {
+  assert(!backoffice.includes(inactive), `Backoffice UI source still contains inactive term ${JSON.stringify(inactive)}`)
 }
 
 console.log(`✓ verified src/ source of truth, ${checkedModules.size} published modules, and GitHub Pages paths`)
