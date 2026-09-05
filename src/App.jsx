@@ -61,6 +61,56 @@ function About() {
 function Contact() {
     return _jsxs("section", { className: "section contact", id: "kontakt", children: [_jsxs("div", { children: [_jsx("p", { children: "SKRIK INTE \u2014 SKRIV" }), _jsx("h2", { children: language.contact.toUpperCase() }), _jsx("p", { children: "Boka trucken, fr\u00E5ga om ingredienser eller f\u00F6resl\u00E5 ett samarbete." })] }), _jsx("a", { className: "button pink", href: "mailto:hej@harligebenkes.se", children: "HEJ@HARLIGEBENKES.SE" })] });
 }
+export const veganResults = [
+    { kind: 'devil', art: '♦ 🔥 👿 🔱 🔥 ♦', text: 'DU HAR KOMMIT FEL.' },
+    { kind: 'butcher', art: '🔔 🥓 ✦ DAGENS SPECIAL ✦ 🥓 🔔', text: 'Kan vi fresta med dagens grönsak? Den heter bacon.' },
+    { kind: 'warning', art: '⚠ ⚠ ⚠', text: 'VEGANSKT ALTERNATIV:\nTa bort köttet.\nOch osten.\nOch pizzan.' },
+    { kind: 'calm', art: '✿ ☺ ✿', text: 'Ruccolan är vegansk.\nDet får räcka så länge.' },
+];
+export function selectVeganResult(previous, random = Math.random) {
+    const choices = veganResults.map((_, index) => index).filter(index => index !== previous);
+    return choices[Math.floor(random() * choices.length)];
+}
+function VeganSurprise() {
+    const [result, setResult] = useState(null);
+    const [spinning, setSpinning] = useState(false);
+    const [previous, setPrevious] = useState(null);
+    const [pending, setPending] = useState(null);
+    const close = () => {
+        if (pending) pending.cancelled = true;
+        setResult(null);
+        setSpinning(false);
+        setTimeout(() => document.querySelector?.('.vegan-trigger')?.focus?.(), 0);
+    };
+    const open = event => {
+        const request = { cancelled: false };
+        setPending(request);
+        setSpinning(true);
+        setTimeout(() => document.querySelector?.('.vegan-close')?.focus?.(), 0);
+        setTimeout(() => {
+            if (request.cancelled) return;
+            const next = selectVeganResult(previous);
+            setPrevious(next);
+            setResult(next);
+            setSpinning(false);
+        }, 1200);
+    };
+    const onKeyDown = event => {
+        if (event.key === 'Escape') close();
+        if (event.key === 'Tab') {
+            event.preventDefault();
+            document.querySelector?.('.vegan-close')?.focus?.();
+        }
+    };
+    const active = result == null ? null : veganResults[result];
+    return _jsxs(_Fragment, { children: [
+        _jsx("button", { className: "vegan-trigger", type: "button", onClick: open, "aria-label": "Testa Benkes veganska slumpgenerator", children: "VEGAN?" }),
+        (spinning || active) && _jsx("div", { className: "vegan-overlay", role: "presentation", children: _jsxs("section", { className: `vegan-modal ${active?.kind ?? 'spinning'}`, role: "dialog", "aria-modal": "true", "aria-labelledby": "vegan-title", onKeyDown, children: [
+            _jsx("button", { className: "vegan-close", type: "button", onClick: close, "aria-label": "Stäng resultatet", children: "×" }),
+            spinning ? _jsxs("div", { className: "vegan-spinner", role: "status", children: [_jsx("span", { "aria-hidden": "true", children: "✦ 🍕 ✦" }), _jsx("h2", { id: "vegan-title", children: "KOLLAR I UGNEN…" })] }) : _jsxs("div", { className: "vegan-result", children: [_jsx("div", { className: "vegan-art", "aria-hidden": "true", children: active.art }), _jsx("h2", { id: "vegan-title", children: active.text })] })
+        ] }) })
+    ] });
+}
 export default function App() {
-    return _jsxs(_Fragment, { children: [_jsx("a", { className: "skip-link", href: "#main", children: "Hoppa till inneh\u00E5llet" }), _jsx(Header, {}), _jsxs("main", { id: "main", children: [_jsx(Hero, {}), _jsx(PizzaMenu, {}), _jsx(Events, {}), _jsx(Social, {}), _jsx(Payment, {}), _jsx(About, {}), _jsx(Contact, {})] }), _jsxs("footer", { children: [_jsxs("div", { className: "footer-logo", children: ["H\u00C4RLIGE BENKES ", _jsx("span", { children: "PIZZA" })] }), _jsx("p", { children: "PEACE \u00B7 PIZZA \u00B7 LOVE" }), _jsx("p", { children: "\u00A9 2026 \u00B7 GJORT MED \u2665 I HUSKVARNA" })] })] });
+    return _jsxs(_Fragment, { children: [_jsx("a", { className: "skip-link", href: "#main", children: "Hoppa till inneh\u00E5llet" }), _jsx(Header, {}), _jsxs("main", { id: "main", children: [_jsx(Hero, {}), _jsx(PizzaMenu, {}), _jsx(Events, {}), _jsx(Social, {}), _jsx(Payment, {}), _jsx(About, {}), _jsx(Contact, {})] }), _jsx(VeganSurprise, {}), _jsxs("footer", { children: [_jsxs("div", { className: "footer-logo", children: ["H\u00C4RLIGE BENKES ", _jsx("span", { children: "PIZZA" })] }), _jsx("p", { children: "PEACE \u00B7 PIZZA \u00B7 LOVE" }), _jsx("p", { children: "\u00A9 2026 \u00B7 GJORT MED \u2665 I HUSKVARNA" })] })] });
 }
