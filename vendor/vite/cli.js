@@ -11,11 +11,12 @@ const config = (await import(new URL(`file://${resolve(cwd, 'vite.config.js')}`)
 const configuredBase = config.base || '/'
 const base = `/${configuredBase.replace(/^\/+|\/+$/g, '')}${configuredBase === '/' ? '' : '/'}`
 
-function copySource(sourceName, outputName) {
+function copySource(sourceName, outputName, transform = source => source) {
   const source = resolve(cwd, 'src', sourceName)
   const output = join(out, 'src', outputName)
-  cpSync(source, output)
-  if (!readFileSync(source).equals(readFileSync(output))) {
+  const builtSource = transform(readFileSync(source, 'utf8'))
+  writeFileSync(output, builtSource)
+  if (builtSource !== readFileSync(output, 'utf8')) {
     throw new Error(`Built ${outputName} differs from src/${sourceName}`)
   }
 }
@@ -27,7 +28,8 @@ function compile() {
   // Application code and styles always come from src/. There is deliberately no
   // vendored application template: these byte-for-byte checks enforce that rule.
   copySource('main.jsx', 'main.js')
-  copySource('App.jsx', 'App.js')
+  copySource('App.jsx', 'App.js', source => source.replace("'./Backoffice.jsx'", "'./Backoffice.js'"))
+  copySource('Backoffice.jsx', 'Backoffice.js')
   copySource('styles.css', 'styles.css')
 
   cpSync(new URL('../react', import.meta.url), join(out, 'node_modules/react'), { recursive: true })
