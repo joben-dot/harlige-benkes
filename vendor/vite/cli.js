@@ -31,6 +31,7 @@ function compile() {
   copySource('App.jsx', 'App.js')
   copySource('Backoffice.jsx', 'Backoffice.js')
   copySource('styles.css', 'styles.css')
+  cpSync(resolve(cwd, 'src/assets'), join(out, 'src/assets'), { recursive: true })
 
   cpSync(new URL('../react', import.meta.url), join(out, 'node_modules/react'), { recursive: true })
   cpSync(new URL('../react-dom', import.meta.url), join(out, 'node_modules/react-dom'), { recursive: true })

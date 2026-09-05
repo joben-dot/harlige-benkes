@@ -62,14 +62,17 @@ function Contact() {
     return _jsxs("section", { className: "section contact", id: "kontakt", children: [_jsxs("div", { children: [_jsx("p", { children: "SKRIK INTE \u2014 SKRIV" }), _jsx("h2", { children: language.contact.toUpperCase() }), _jsx("p", { children: "Boka trucken, fr\u00E5ga om ingredienser eller f\u00F6resl\u00E5 ett samarbete." })] }), _jsx("a", { className: "button pink", href: "mailto:hej@harligebenkes.se", children: "HEJ@HARLIGEBENKES.SE" })] });
 }
 export const veganResults = [
-    { kind: 'devil', art: '♦ 🔥 👿 🔱 🔥 ♦', text: 'DU HAR KOMMIT FEL.' },
-    { kind: 'butcher', art: '🔔 🥓 ✦ DAGENS SPECIAL ✦ 🥓 🔔', text: 'Kan vi fresta med dagens grönsak? Den heter bacon.' },
-    { kind: 'warning', art: '⚠ ⚠ ⚠', text: 'VEGANSKT ALTERNATIV:\nTa bort köttet.\nOch osten.\nOch pizzan.' },
-    { kind: 'calm', art: '✿ ☺ ✿', text: 'Ruccolan är vegansk.\nDet får räcka så länge.' },
+    {
+        kind: 'diavola',
+        name: 'DIAVOLA VEGANA',
+        price: 179,
+        description: '”Snäll mot djuren. Fullständigt hänsynslös mot munnen.”',
+        toppings: 'Extra stark tomatsås, massor av vegansk chili, couscous, jams och en hel rå morot på toppen.',
+    },
 ];
 export function selectVeganResult(previous, random = Math.random) {
     const choices = veganResults.map((_, index) => index).filter(index => index !== previous);
-    return choices[Math.floor(random() * choices.length)];
+    return choices.length ? choices[Math.floor(random() * choices.length)] : 0;
 }
 function VeganSurprise() {
     const [result, setResult] = useState(null);
@@ -78,12 +81,14 @@ function VeganSurprise() {
     const [pending, setPending] = useState(null);
     const close = () => {
         if (pending) pending.cancelled = true;
+        document.body?.classList?.remove?.('vegan-is-open');
         setResult(null);
         setSpinning(false);
         setTimeout(() => document.querySelector?.('.vegan-trigger')?.focus?.(), 0);
     };
     const open = event => {
         const request = { cancelled: false };
+        document.body?.classList?.add?.('vegan-is-open');
         setPending(request);
         setSpinning(true);
         setTimeout(() => document.querySelector?.('.vegan-close')?.focus?.(), 0);
@@ -105,9 +110,18 @@ function VeganSurprise() {
     const active = result == null ? null : veganResults[result];
     return _jsxs(_Fragment, { children: [
         _jsx("button", { className: "vegan-trigger", type: "button", onClick: open, "aria-label": "Testa Benkes veganska slumpgenerator", children: "VEGAN?" }),
-        (spinning || active) && _jsx("div", { className: "vegan-overlay", role: "presentation", children: _jsxs("section", { className: `vegan-modal ${active?.kind ?? 'spinning'}`, role: "dialog", "aria-modal": "true", "aria-labelledby": "vegan-title", onKeyDown, children: [
-            _jsx("button", { className: "vegan-close", type: "button", onClick: close, "aria-label": "Stäng resultatet", children: "×" }),
-            spinning ? _jsxs("div", { className: "vegan-spinner", role: "status", children: [_jsx("span", { "aria-hidden": "true", children: "✦ 🍕 ✦" }), _jsx("h2", { id: "vegan-title", children: "KOLLAR I UGNEN…" })] }) : _jsxs("div", { className: "vegan-result", children: [_jsx("div", { className: "vegan-art", "aria-hidden": "true", children: active.art }), _jsx("h2", { id: "vegan-title", children: active.text })] })
+        (spinning || active) && _jsx("div", { className: "vegan-overlay", children: _jsxs("section", { className: `vegan-modal ${active?.kind ?? 'spinning'}`, role: "dialog", "aria-modal": "true", "aria-labelledby": "vegan-title", onKeyDown, children: [
+            _jsx("img", { className: "vegan-backdrop", src: "./src/assets/devil-frame.png", alt: "En tecknad djävul i ett brinnande landskap som håller upp en ljus ram" }),
+            _jsxs("div", { className: "vegan-frame-content", children: [
+                _jsx("button", { className: "vegan-close", type: "button", onClick: close, "aria-label": "Stäng resultatet", children: "×" }),
+                spinning ? _jsxs("div", { className: "vegan-spinner", role: "status", children: [_jsx("span", { "aria-hidden": "true", children: "✦ 🍕 ✦" }), _jsx("h2", { id: "vegan-title", children: "KOLLAR I UGNEN…" })] }) : _jsxs("article", { className: "vegan-result pizza-card", children: [
+                    _jsx("p", { className: "number", children: "05 / BENKES ORIGINAL" }),
+                    _jsx("h2", { id: "vegan-title", children: active.name }),
+                    _jsx("p", { className: "vegan-description", children: active.description }),
+                    _jsxs("p", { className: "toppings", children: [_jsx("strong", { children: "INGREDIENSER:" }), " ", active.toppings] }),
+                    _jsxs("div", { className: "price", children: [active.price, " ", _jsx("span", { children: "KRONOR" })] }),
+                ] })
+            ] })
         ] }) })
     ] });
 }

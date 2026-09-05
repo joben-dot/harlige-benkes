@@ -18,6 +18,7 @@ assert(backoffice.includes('const chatMessages = Array.isArray(chat) ? chat : []
 assert(backoffice.includes('setChat(previous => [...(Array.isArray(previous) ? previous : [])'), 'Backoffice chat updates must preserve the array state type')
 assert(backoffice.includes('const pizzaSeed = Array.isArray(initialPizzas) ? initialPizzas : []'), 'Backoffice pizza and menu state must start from an array')
 assert(read('dist/src/styles.css') === read('src/styles.css'), 'dist/src/styles.css is not copied directly from src/styles.css')
+assert(existsSync(resolve(root, 'dist/src/assets/devil-frame.png')), 'the local VEGAN? backdrop is missing from the build')
 assert(read('dist/index.html').includes('/harlige-benkes/src/main.js'), 'GitHub Pages subpath is missing from the entry script')
 assert(read('dist/index.html').includes('/harlige-benkes/src/styles.css'), 'GitHub Pages subpath is missing from the stylesheet')
 
