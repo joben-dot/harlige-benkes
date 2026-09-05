@@ -28,7 +28,7 @@ function compile() {
   // Application code and styles always come from src/. There is deliberately no
   // vendored application template: these byte-for-byte checks enforce that rule.
   copySource('main.jsx', 'main.js')
-  copySource('App.jsx', 'App.js', source => source.replace("'./Backoffice.jsx'", "'./Backoffice.js'"))
+  copySource('App.jsx', 'App.js')
   copySource('Backoffice.jsx', 'Backoffice.js')
   copySource('styles.css', 'styles.css')
 

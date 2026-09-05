@@ -1,11 +1,10 @@
 import { jsx as _jsx, jsxs as _jsxs } from 'react/jsx-runtime';
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 
 const areas = ['DAGENS MENY', 'PIZZABIBLIOTEK', 'TRUCKSTATUS', 'FRÅN LUCKAN', 'BESTÄLLNINGAR', 'SÄNDER LAJV'];
 const statuses = ['TILLGÄNGLIG', 'NÄSTAN SLUT', 'SLUTSÅLD'];
 
 function Picture({ pizza, onImage, camera = false }) {
-  const input = useRef(null);
   const load = event => {
     const file = event.target.files?.[0];
     if (file) onImage?.(URL.createObjectURL(file));
@@ -13,8 +12,8 @@ function Picture({ pizza, onImage, camera = false }) {
   return _jsxs('div', { className: `bo-picture ${pizza.image?.startsWith('blob:') ? '' : pizza.image}`, style: pizza.image?.startsWith('blob:') ? { backgroundImage: `url(${pizza.image})` } : {}, children: [
     _jsx('span', { children: pizza.icon || '🍕' }),
     onImage && _jsxs('div', { className: 'photo-actions', children: [
-      _jsx('button', { type: 'button', onClick: () => input.current.click(), children: camera ? 'TA BILD' : 'BYT BILD' }),
-      _jsx('input', { ref: input, type: 'file', accept: 'image/*', capture: camera ? 'environment' : undefined, onChange: load, className: 'sr-only' })
+      _jsx('button', { type: 'button', onClick: event => event.currentTarget.nextElementSibling.click(), children: camera ? 'TA BILD' : 'BYT BILD' }),
+      _jsx('input', { type: 'file', accept: 'image/*', capture: camera ? 'environment' : undefined, onChange: load, className: 'sr-only' })
     ] })
   ] });
 }
