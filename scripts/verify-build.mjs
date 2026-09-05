@@ -83,20 +83,15 @@ assert(
   languageProfile.includes("export const activeLanguageProfile = 'standard'"),
   'standard Swedish must be the active language profile',
 )
-for (const expected of ['PEPPERONI, CHILI & HONUNG', 'Facebook', 'Ingredienser', 'Huskvarna']) {
+for (const expected of ['PEPPERONI MED STING', 'Facebook', 'Ingredienser', 'Huskvarna']) {
   assert(languageProfile.includes(expected), `standard profile does not contain ${JSON.stringify(expected)}`)
 }
-for (const expected of [
-  'OSSJ DEVON', 'EXPRÄ GOGGONZÅLA', 'FJOCKLA JORDPÄRA', 'PILO SPÄZZIJAL',
-  'Huskvana', 'Jönnet', 'Evänts', 'Kaländarium', 'Kåntakt', 'Tåppings',
-  'Se mänyn', 'Fäjjsbook', 'Kåntanter', 'betala mä kott',
-]) {
-  assert(languageProfile.includes(expected), `benke profile does not preserve ${JSON.stringify(expected)}`)
-}
+assert(languageProfile.includes('export const getLanguageProfile = profile =>'), 'language profile resolver is missing')
 for (const expected of ['VECKANS', 'language.ingredients.toUpperCase()', 'language.seeMenu.toUpperCase()']) {
   assert(app.includes(expected), `dist/src/App.js does not contain ${JSON.stringify(expected)}`)
 }
 for (const inactive of ['OSSJ DEVON', 'Huskvana', 'Evänts', 'Kaländarium', 'Kåntakt', 'Tåppings', 'Se mänyn', 'Fäjjsbook', 'Kåntanter', 'betala mä kott', 'Lajv']) {
+  assert(!app.includes(inactive), `public UI source still contains removed term ${JSON.stringify(inactive)}`)
   assert(!backoffice.includes(inactive), `Backoffice UI source still contains inactive term ${JSON.stringify(inactive)}`)
 }
 
