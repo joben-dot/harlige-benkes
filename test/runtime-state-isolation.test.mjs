@@ -1,5 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import { readFileSync } from 'node:fs'
 
 class TestNode {
   constructor(type, text = '') { this.type = type; this.value = text; this.children = []; this.listeners = {}; this.attributes = {} }
@@ -45,6 +46,10 @@ test('the lighthearted standard profile is active and can be extended', async ()
   for (const brandPhrase of ['PIZZA AROUND THE CLOCK', 'GET PIZZA!', 'FIND THE TRUCK', 'PEACE · PIZZA · LOVE']) {
     assert.ok(container.textContent.includes(brandPhrase), `${brandPhrase} must remain unchanged`)
   }
+  const publicAppSource = readFileSync(new URL('../dist/src/App.js', import.meta.url), 'utf8')
+  assert.ok(!publicAppSource.includes('className: "tagline"'), 'the hero tagline element must be removed')
+  assert.ok(!publicAppSource.includes('className: "ticker"'), 'the hero ticker element must be removed')
+  assert.ok(!container.textContent.includes('TUNNA SLICES'), 'the ticker copy must not be visible')
 })
 
 test('component state is scoped by parent instance, type, and key', async () => {
